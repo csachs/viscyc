@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Viscyc Interface</title>
+
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+</head>
+<body>
+<header class="px-3 py-2 bg-dark text-white">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+
+                <li>
+                    <a href="#" class="nav-link text-white">
+                        <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="node_modules/bootstrap-icons/bootstrap-icons.svg#bicycle" /></svg>
+                        Viscyc
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#status" class="nav-link text-white">
+                        <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="node_modules/bootstrap-icons/bootstrap-icons.svg#power" /></svg>
+                        Status
+                    </a>
+                </li>
+                <li>
+                    <a href="#currentCadence" class="nav-link text-white">
+                        <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="node_modules/bootstrap-icons/bootstrap-icons.svg#speedometer2" /></svg>
+                        Cadence
+                    </a>
+                </li>
+                <li>
+                    <a href="#camera" class="nav-link text-white">
+                        <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="node_modules/bootstrap-icons/bootstrap-icons.svg#camera-video" /></svg>
+                        Camera
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<main class="container-fluid pb-3">
+    <section id="status" class="bg-light border rounded-3">
+        <h1><svg class="bi" width="32" height="32"><use xlink:href="node_modules/bootstrap-icons/bootstrap-icons.svg#power" /></svg> Status</h1>
+        <ul>
+            <li id="detector">Detection: <span class="status">n/a</span> <button type="button" class="btn btn-success on">On</button>  <button type="button" class="btn btn-danger off">Off</button></li>
+            <li id="sender">Sending: <span class="status">n/a</span> <button type="button" class="btn btn-success on">On</button>  <button type="button" class="btn btn-danger off">Off</button></li>
+        </ul>
+    </section>
+
+
+    <section id="currentCadence" class="bg-light border rounded-3">
+        <h1><svg class="bi" width="32" height="32"><use xlink:href="node_modules/bootstrap-icons/bootstrap-icons.svg#speedometer2" /></svg> Cadence</h1>
+        <ul>
+            <li id="cadence">Cadence: <span class="value">0</span> rpm</li>
+            <li id="power">Power: <span class="value">0</span> Watt</li>
+        </ul>
+    </section>
+
+    <section id="camera" class="bg-light border rounded-3">
+        <h1><svg class="bi" width="32" height="32"><use xlink:href="node_modules/bootstrap-icons/bootstrap-icons.svg#camera-video" /></svg> Camera</h1>
+
+        <button type="button" class="btn btn-outline-primary reload"><svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="node_modules/bootstrap-icons/bootstrap-icons.svg#arrow-repeat" /></svg></button><br />
+
+        <img src="camera.jpg" style="width: 100%;"/>
+    </section>
+
+</main>
+
+<footer class="container-fluid pb-3">
+    <a href="https://github.com/csachs/viscyc">Viscyc</a> 0.0.1. Copyright © 2021 Christian Sachs. Available under the MIT License.
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        function serviceUrl(service) {
+            return '/status/' + service;
+        }
+
+        let services = ['detector', 'sender'];
+
+        function bindButtons(service) {
+            function setStatus(active) {
+                fetch(serviceUrl(service), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json'},
+                    body: JSON.stringify({active: active})
+                });
+            }
+
+            document.getElementById(service).querySelector('.on').addEventListener('click', () => setStatus(true));
+            document.getElementById(service).querySelector('.off').addEventListener('click', () => setStatus(false));
+
+        }
+
+        function update(service) {
+            fetch(serviceUrl(service)).then(response => response.json()).
+            then(data => document.getElementById(service).querySelector('.status')
+                .innerText = data.active ? 'on' : 'off');
+        }
+
+        let cameraReloadCounter = 0;
+
+        function bindCameraButton() {
+            document.querySelector('#camera button.reload').addEventListener('click', () =>
+                document.querySelector('#camera img').src = 'camera.jpg?' + cameraReloadCounter++
+            );
+        }
+
+        function timer() {
+            services.forEach(update);
+
+            fetch('/cadence').then(response => response.json()).
+                then(data => {
+                    document.getElementById('cadence').querySelector('.value').innerText = data.rpm ? Math.round(data.rpm) : 'n/a';
+                    document.getElementById('power').querySelector('.value').innerText = data.watts ? Math.round(data.watts) : 'n/a';
+
+            });
+
+            setTimeout(timer, 1000);
+        }
+
+        bindCameraButton();
+        services.forEach(bindButtons);
+        timer();
+    });
+</script>
+
+</body>
+</html>

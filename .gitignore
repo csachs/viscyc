@@ -1,0 +1,11 @@
+local/
+
+dist/
+build/
+
+.ipynb_checkpoints/
+
+__pycache__/
+node_modules/
+
+*.pyc

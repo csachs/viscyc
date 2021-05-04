@@ -1,0 +1,18 @@
+{
+  "name": "viscyc",
+  "version": "0.0.1",
+  "description": "",
+  "main": "zwack-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Christian Sachs",
+  "license": "MIT",
+  "dependencies": {
+    "@abandonware/bleno": "^0.5.1-4",
+    "bootstrap": "^5.0.0-beta3",
+    "bootstrap-icons": "^1.4.1",
+    "yargs": "^16.2.0",
+    "zwack": "^0.1.8"
+  }
+}
